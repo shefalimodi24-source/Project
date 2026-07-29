@@ -244,3 +244,5 @@ Docker itself wasn't verified end-to-end — that needs WSL2 + Docker Desktop, w
 One open note from the plan: I deliberately left WhisperX/Gemma stub containers out of Compose even though DEVELOPMENT_PLAN.md's Phase 0 description mentions them — logged in docs/decisions.md along with the other Phase 0 calls (image choices, Alembic ownership, worker being infra-only this phase).
 
 Nothing has been committed — everything's just staged on disk in a clean working tree, ready for you to review and commit when you're ready.
+
+https://github.com/shefalimodi24-source/Sales_Project.git
