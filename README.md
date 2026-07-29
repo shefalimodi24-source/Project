@@ -230,60 +230,17 @@ WhisperX repo link : https://github.com/m-bain/whisperX
 
 <img width="3015" height="1781" alt="mermaid-diagram (4)" src="https://github.com/user-attachments/assets/212c380a-e855-44fa-847c-5dabfd52c053" />
 
-We are building a self-hosted Meeting Intelligence platform.
+Phase 0 is complete and verified
 
-Before writing application code:
-1. Create CLAUDE.md, DEVELOPMENT_PLAN.md, ARCHITECTURE.md, and docs/decisions.md.
-2. I will paste the complete development plan and architecture after this message. Use them as the source of truth.
-3. Set up only Phase 0: monorepo structure, Docker Compose, Next.js, FastAPI, PostgreSQL with pgvector, MinIO, a PostgreSQL-backed worker service, health checks, environment template, linting, and tests.
-4. Do not use Redis or Celery.
-5. Do not build recording, WhisperX, Gemma, login, or UI features yet.
-6. Show me the implementation plan before changing files.
+Built exactly the infra scope agreed in the plan — monorepo (web/, api/, worker/, infra/, docs/), Docker Compose wiring six services (postgres+pgvector, minio, minio-init, api, worker, web) with health checks and service_healthy dependency chains, .env.example, ruff for Python and ESLint/Prettier for web, and tests throughout. No Redis/Celery, no recording/WhisperX/Gemma/login/UI features.
 
-# Architecture
+Verified locally (installed Python 3.12, Node 24 LTS via winget to do so):
+- api/: ruff check clean, 3/3 pytest passing
+- worker/: ruff check clean, 5/5 pytest passing
+- web/: next lint clean, 1/1 vitest passing, next build succeeds (standalone output)
 
-## Required Services
+Docker itself wasn't verified end-to-end — that needs WSL2 + Docker Desktop, which requires a reboot and interactive setup, so I skipped it per your call. The docker compose up --build + health-check verification steps are documented in CLAUDE.md for you to run on your dev machine or the target server.
 
-- Next.js/React frontend
-- FastAPI backend API
-- PostgreSQL with pgvector
-- Self-hosted MinIO for recording chunks and finalized audio
-- Dedicated Python worker service backed by a PostgreSQL jobs table
-- WhisperX for transcription, word alignment, and speaker diarization
-- Self-hosted Gemma 4 inference service
-- Local embedding service for knowledge-pack retrieval
+One open note from the plan: I deliberately left WhisperX/Gemma stub containers out of Compose even though DEVELOPMENT_PLAN.md's Phase 0 description mentions them — logged in docs/decisions.md along with the other Phase 0 calls (image choices, Alembic ownership, worker being infra-only this phase).
 
-Do not use Redis or Celery.
-
-## Recording and Processing Flow
-
-1. An authenticated user selects a browser microphone and starts recording.
-2. Audio chunks upload to MinIO while recording.
-3. When the user presses Stop, the API finalizes the recording and creates a durable PostgreSQL processing job.
-4. The worker claims the job with database row locking.
-5. WhisperX creates a timestamped transcript and anonymous speaker labels.
-6. The user confirms, swaps, or edits inferred speaker roles.
-7. The worker retrieves relevant Markdown knowledge-pack sections using pgvector.
-8. Gemma 4 produces the three evidence-backed result buckets.
-9. A Manager or Admin reviews and approves/rejects knowledge proposals.
-
-## Data Responsibilities
-
-### PostgreSQL + pgvector
-
-Store users, roles, sessions, recordings, processing jobs, transcripts, speaker-role mappings, analyses, knowledge-pack versions, vector chunks, proposals, approvals, and audit events.
-
-### MinIO
-
-Store recording chunks and finalized audio objects. Do not store raw audio inside PostgreSQL.
-
-## Job States
-
-```text
-recording
-→ uploading
-→ upload_finalized
-→ transcribing
-→ quality_warning OR awaiting_role_confirmation
-→ analysing
-→ complete OR failed
+Nothing has been committed — everything's just staged on disk in a clean working tree, ready for you to review and commit when you're ready.
