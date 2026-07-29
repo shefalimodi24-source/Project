@@ -239,3 +239,51 @@ Before writing application code:
 4. Do not use Redis or Celery.
 5. Do not build recording, WhisperX, Gemma, login, or UI features yet.
 6. Show me the implementation plan before changing files.
+
+# Architecture
+
+## Required Services
+
+- Next.js/React frontend
+- FastAPI backend API
+- PostgreSQL with pgvector
+- Self-hosted MinIO for recording chunks and finalized audio
+- Dedicated Python worker service backed by a PostgreSQL jobs table
+- WhisperX for transcription, word alignment, and speaker diarization
+- Self-hosted Gemma 4 inference service
+- Local embedding service for knowledge-pack retrieval
+
+Do not use Redis or Celery.
+
+## Recording and Processing Flow
+
+1. An authenticated user selects a browser microphone and starts recording.
+2. Audio chunks upload to MinIO while recording.
+3. When the user presses Stop, the API finalizes the recording and creates a durable PostgreSQL processing job.
+4. The worker claims the job with database row locking.
+5. WhisperX creates a timestamped transcript and anonymous speaker labels.
+6. The user confirms, swaps, or edits inferred speaker roles.
+7. The worker retrieves relevant Markdown knowledge-pack sections using pgvector.
+8. Gemma 4 produces the three evidence-backed result buckets.
+9. A Manager or Admin reviews and approves/rejects knowledge proposals.
+
+## Data Responsibilities
+
+### PostgreSQL + pgvector
+
+Store users, roles, sessions, recordings, processing jobs, transcripts, speaker-role mappings, analyses, knowledge-pack versions, vector chunks, proposals, approvals, and audit events.
+
+### MinIO
+
+Store recording chunks and finalized audio objects. Do not store raw audio inside PostgreSQL.
+
+## Job States
+
+```text
+recording
+→ uploading
+→ upload_finalized
+→ transcribing
+→ quality_warning OR awaiting_role_confirmation
+→ analysing
+→ complete OR failed
