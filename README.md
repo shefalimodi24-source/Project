@@ -229,3 +229,13 @@ Implement proposal approval/version history, 30-day deletion for unsaved meeting
 WhisperX repo link : https://github.com/m-bain/whisperX 
 
 <img width="3015" height="1781" alt="mermaid-diagram (4)" src="https://github.com/user-attachments/assets/212c380a-e855-44fa-847c-5dabfd52c053" />
+
+We are building a self-hosted Meeting Intelligence platform.
+
+Before writing application code:
+1. Create CLAUDE.md, DEVELOPMENT_PLAN.md, ARCHITECTURE.md, and docs/decisions.md.
+2. I will paste the complete development plan and architecture after this message. Use them as the source of truth.
+3. Set up only Phase 0: monorepo structure, Docker Compose, Next.js, FastAPI, PostgreSQL with pgvector, MinIO, a PostgreSQL-backed worker service, health checks, environment template, linting, and tests.
+4. Do not use Redis or Celery.
+5. Do not build recording, WhisperX, Gemma, login, or UI features yet.
+6. Show me the implementation plan before changing files.
