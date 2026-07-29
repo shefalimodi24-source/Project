@@ -236,3 +236,6 @@ Done when the full upload-to-result workflow works against 10-20 representative 
 ## 11. Recommended First Agent Task
 
 Create the monorepo and Phase 0 Docker Compose stack only. Do not begin UI or model integration until the environment, migrations, health checks, and local test commands are documented and working.
+
+
+whisperX github repo link : https://github.com/m-bain/whisperX
